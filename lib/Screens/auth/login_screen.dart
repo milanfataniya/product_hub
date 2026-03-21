@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:product_hub/Firebase_auth_service/firebase.dart';
 import 'package:product_hub/Screens/auth/signup_screen.dart';
 import 'package:product_hub/Screens/home/home_screen.dart';
+import 'package:product_hub/Widgets/custom_dialog.dart';
 import 'package:product_hub/Widgets/custome_textfield.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,8 +15,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formkey = GlobalKey<FormState>();
+  final _dialogFormKey = GlobalKey<FormState>();
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+  TextEditingController resetEmailController = TextEditingController();
 
   bool isloading = false;
   FirebaseService firebaseService = FirebaseService();
@@ -46,6 +49,31 @@ class _LoginScreenState extends State<LoginScreen> {
     } finally {
       setState(() => isloading = false);
     }
+  }
+
+  forgotpassword()async{
+    try{
+      String? result=await firebaseService.forgotpassword(resetEmailController.text);
+      if(result==null){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Password reset link sent to your email"),
+          ),
+        );
+      }
+      else{
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result),
+          ),
+        );
+      }
+
+    }
+    catch(e){
+
+    }
+
   }
 
   @override
@@ -177,7 +205,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
 
                       const SizedBox(height: 20),
-
+                      TextButton(
+                        onPressed: () {
+                          resetEmailController.clear();
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return CustomDialog(
+                                controller: resetEmailController,
+                                firebaseService: firebaseService,
+                              );
+                            },
+                          );
+                        },
+                        child: Text("Forgot Password?"),
+                      ),
                       /// Signup Navigation
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

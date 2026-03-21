@@ -39,10 +39,14 @@ class FirebaseService {
 
   Future<String?> signup(String email, String password) async {
     try {
+      UserCredential userCredential =
       await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      if (userCredential.user != null) {
+        await userCredential.user!.sendEmailVerification();
+      }
       return null;
     } on FirebaseAuthException catch (e) {
       return handleAuthError(e.code);
@@ -53,7 +57,18 @@ class FirebaseService {
 
   Future<String?> signin(String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential =
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      User? user=userCredential!.user;
+          await user?.reload();
+          user=_auth.currentUser;
+        if(user!=null && !user.emailVerified){
+          await _auth.signOut();
+          return "Please verify email first";
+        }
       return null;
     } on FirebaseAuthException catch (e) {
       return handleAuthError(e.code);
@@ -61,4 +76,20 @@ class FirebaseService {
       return "Somthing went Wrong ";
     }
   }
+
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
+
+  Future<String?> forgotpassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return handleAuthError(e.code);
+    } catch (e) {
+      return "Something went wrong";
+    }
+  }
+
 }
