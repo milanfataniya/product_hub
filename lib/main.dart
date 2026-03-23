@@ -5,10 +5,14 @@ import 'package:product_hub/Screens/auth/login_screen.dart';
 import 'package:product_hub/Screens/auth/signup_screen.dart';
 import 'package:product_hub/Screens/splash/splash_screen.dart';
 import 'package:product_hub/firebase_options.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(const MyApp());
 }
 
@@ -23,6 +27,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
+
       home: SplashScreen(),
     );
   }

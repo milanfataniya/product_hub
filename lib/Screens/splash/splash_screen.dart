@@ -22,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void checkuser()async{
-    await Future.delayed(Duration(seconds: 10));
+    await Future.delayed(Duration(seconds: 0));
 
     User? user=FirebaseAuth.instance.currentUser;
     if(user!=null){

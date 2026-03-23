@@ -32,8 +32,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (result == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Login Successful")),
+          SnackBar(
+            backgroundColor: Colors.green,
+            content: Text(
+              "Login Successful",
+            ),
+          ),
         );
+
         Future.delayed(Duration(seconds: 2));
         Navigator.pushAndRemoveUntil(
           context,
@@ -41,8 +47,14 @@ class _LoginScreenState extends State<LoginScreen> {
               (route) => false,
         );
       } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(result)));
+        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            result,
+          ),
+        ),
+      );;
       }
     } catch (e) {
       print(e);

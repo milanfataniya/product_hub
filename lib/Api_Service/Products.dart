@@ -4,28 +4,27 @@
 
   class Api_Service {
 
-    final url = "https://fakestoreapi.com/products";
+    final url = "https://dummyjson.com/products?limit=2000";
+      Future<List<ProductModel>>getproduct()async{
+        try{
+          final respose=await http.get(Uri.parse(url));
+          if(respose.statusCode==200){
+            final decode=jsonDecode(respose.body);
+            List data=decode['products'];
 
-    Future<List<ProductModel>> getProducts() async {
-      try {
-        var response = await http.get(Uri.parse(url));
+            List<ProductModel> products=data.map((e)=>ProductModel.fromJson(e)).toList();
+            return products;
 
-        print("STATUS CODE: ${response.statusCode}");
+          }
+          else{
+              throw Exception("Failed to load data");
+          }
 
-        if (response.statusCode == 200) {
-          List data = jsonDecode(response.body);
-
-          List<ProductModel> products =
-          data.map((e)=>ProductModel.fromJson(e)).toList();
-
-          return products;
-        } else {
-          print("ERROR: ${response.statusCode}");
+        }
+        catch(e){
+          print(e);
           return [];
         }
-      } catch (e) {
-        print("EXCEPTION: $e");
-        return [];
       }
-    }
+      
   }

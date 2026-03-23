@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:product_hub/Screens/auth/login_screen.dart';
 import 'package:product_hub/Widgets/custome_textfield.dart';
 import '../../Firebase_auth_service/firebase.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -12,8 +14,11 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  TextEditingController name = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+  TextEditingController confirmPassword = TextEditingController();
+
   final _formkey = GlobalKey<FormState>();
 
   bool isloading = false;
@@ -21,8 +26,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
+    name.dispose();
     email.dispose();
     password.dispose();
+    confirmPassword.dispose();
     super.dispose();
   }
 
@@ -33,18 +40,36 @@ class _SignupScreenState extends State<SignupScreen> {
       String? result = await firebaseService.signup(email.text, password.text);
 
       if (result == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Account created successfully")),
-        );
+        User? user= FirebaseAuth.instance.currentUser;
+        await FirebaseFirestore.instance.collection("users").doc(user!.uid).set({
+          "uid":user.uid,
+          "name":name.text,
+          "email":email.text,
+          "createdAt": DateTime.now(),
+        });
 
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green,
+            content: Text(
+              "Signup successful! Verify email before login.",
+            ),
+          ),
+        );
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
+
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(result)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              result,
+            ),
+          ),
+        );
       }
     } catch (e) {
       print(e);
@@ -101,8 +126,16 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
 
                     const SizedBox(height: 20),
-
-                    /// Email
+                    // name
+                    CustomeTextfield(
+                      controller: name,
+                      hintText: "Enter Name",
+                      labelText: "Name",
+                      obscureText: false,
+                      prefixIcon: Icon(Icons.person),
+                      keyboardType: TextInputType.text,
+                    ),
+                    //email
                     CustomeTextfield(
                       controller: email,
                       hintText: "Enter Email",
@@ -122,7 +155,16 @@ class _SignupScreenState extends State<SignupScreen> {
                       keyboardType: TextInputType.visiblePassword,
                     ),
 
-                    const SizedBox(height: 25),
+
+                      // confirm password
+                    CustomeTextfield(
+                      controller: confirmPassword,
+                      hintText: "Confirm Password",
+                      labelText: "Confirm Password",
+                      obscureText: true,
+                      prefixIcon: Icon(Icons.lock),
+                      keyboardType: TextInputType.visiblePassword,
+                    ),
 
                     /// Signup Button
                     SizedBox(
@@ -138,9 +180,26 @@ class _SignupScreenState extends State<SignupScreen> {
                         onPressed: isloading
                             ? null
                             : () {
-                                if (_formkey.currentState!.validate()) {
-                                  creatuser();
-                                }
+                          if (_formkey.currentState!.validate()) {
+
+                            if (password.text != confirmPassword.text) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    "Passwords do not match. Please check and try again.",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+
+                            creatuser();
+
+                            password.text="";
+                            confirmPassword.text="";
+                          }
                               },
                         child: isloading
                             ? Row(
