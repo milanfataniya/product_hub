@@ -40,13 +40,12 @@ class _SignupScreenState extends State<SignupScreen> {
       String? result = await firebaseService.signup(email.text, password.text);
 
       if (result == null) {
-        User? user= FirebaseAuth.instance.currentUser;
-        await FirebaseFirestore.instance.collection("users").doc(user!.uid).set({
-          "uid":user.uid,
-          "name":name.text,
-          "email":email.text,
-          "createdAt": DateTime.now(),
-        });
+        User? user = FirebaseAuth.instance.currentUser;
+        await firebaseService.saveUserData(
+          uid: user!.uid,
+          name: name.text,
+          email: email.text,
+        );
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

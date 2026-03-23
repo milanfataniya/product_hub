@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class FirebaseService {
@@ -91,5 +92,32 @@ class FirebaseService {
       return "Something went wrong";
     }
   }
+  Future<void> saveUserData({
+    required String uid,
+    required String name,
+    required String email,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(uid)
+        .set({
+      "uid": uid,
+      "name": name,
+      "email": email,
+      "createdAt": DateTime.now(),
+    });
+  }
 
+  Future<String?> getUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+    var doc = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .get();
+    if (doc.exists) {
+      return doc["name"];
+    }
+    return null;
+  }
 }

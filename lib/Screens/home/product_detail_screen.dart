@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:product_hub/Firebase_auth_service/firebase.dart';
 import 'package:product_hub/Model/products_model.dart';
 import 'package:product_hub/Widgets/custom_appbar.dart';
 
@@ -16,7 +17,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final product = widget.product;
     final reviews = product.reviews;
-
+    FirebaseService firebaseService=FirebaseService();
     return Scaffold(
       appBar: CustomAppbar(
         title: "Details",
@@ -40,8 +41,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
             Expanded(
               child: OutlinedButton(
-                onPressed: () {
-                  // TODO: Add to cart logic
+                onPressed: () async{
+
                 },
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 14),
@@ -179,6 +180,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ),
                   ),
+                ],
+              ),
+              Column(
+                children: [
+
+                 Container(
+                   width: 150,
+                   decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                      Color(0xFFE8FDFC),
+                      Color(0xFFD1F5F2),
+                    ]),
+                     borderRadius: BorderRadius.circular(11)
+                   ),
+                   child: Row(
+                     children: [
+                     Icon(Icons.remove, size: 18)
+                     ],
+                   )
+                 )
                 ],
               ),
               // stock & rating

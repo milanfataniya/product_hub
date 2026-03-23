@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:product_hub/Api_Service/Products.dart';
+import 'package:product_hub/Firebase_auth_service/firebase.dart';
 import 'package:product_hub/Model/products_model.dart';
 import 'package:product_hub/Screens/auth/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,16 +22,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Api_Service api_service = Api_Service();
   List<ProductModel> carouselItems = [];
   String UserName="";
-
+  FirebaseService firebaseService = FirebaseService();
   @override
   void initState() {
     super.initState();
-
     productlist = api_service.getproduct();
-
     productlist.then((value) {
       final shuffled = List<ProductModel>.from(value)..shuffle();
-
       setState(() {
         carouselItems = shuffled.take(5).toList();
       });
@@ -38,13 +36,18 @@ class _HomeScreenState extends State<HomeScreen> {
     getUserData();
   }
   User? user = FirebaseAuth.instance.currentUser;
-
+  void getUserData() async {
+    String? name = await firebaseService.getUserData();
+    setState(() {
+      UserName = name ?? "Welcome";
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: CustomAppbar(
-        title: "Welcom $UserName",
+        title: "Welcome $UserName",
         centerTitle: true,
         automaticallyImplyLeading: false,
         actions: [
@@ -84,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
               final data = await api_service.getproduct();
               carouselItems.shuffle();
               data.shuffle();
+              getUserData();
               setState(() {
                 productlist = Future.value(data);
               });
@@ -320,15 +324,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void getUserData() async{
-    User? user=FirebaseAuth.instance.currentUser;
-    var doc=await FirebaseFirestore.instance.collection("users").doc(user!.uid).get();
-    setState(() {
-      UserName=doc["name"];
-    });
 
-
-
-  }
 
   }
