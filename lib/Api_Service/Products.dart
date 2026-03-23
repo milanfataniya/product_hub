@@ -14,7 +14,6 @@
 
             List<ProductModel> products=data.map((e)=>ProductModel.fromJson(e)).toList();
             return products;
-
           }
           else{
               throw Exception("Failed to load data");

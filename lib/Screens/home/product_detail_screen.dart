@@ -13,10 +13,11 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  int quantity = 1;
+
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
-    final reviews = product.reviews;
     FirebaseService firebaseService=FirebaseService();
     return Scaffold(
       appBar: CustomAppbar(
@@ -116,51 +117,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
               ),
-              //brand & category
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    //brand
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Color(0xFFF1F5F9),
-                      ),
-                      child: Text(
-                        (product.brand != null &&
-                                product.brand!.trim().isNotEmpty)
-                            ? product.brand!
-                            : "Brand not available",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    //category
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Color(0xFFE0F2FE),
-                      ),
-                      child: Text(
-                        product.category,
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               //title
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,26 +138,134 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ],
               ),
+              //price & discout
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.currency_rupee, color: Colors.green),
+                    //price
+                    Text(
+                      "${product.price}",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.green,
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    //discount
+                    Text(
+                      "${product.discountPercentage.toStringAsFixed(0)}% OFF",
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10,),
+              //Quntity
               Column(
                 children: [
 
-                 Container(
-                   width: 150,
-                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Color(0xFFE8FDFC),
-                      Color(0xFFD1F5F2),
-                    ]),
-                     borderRadius: BorderRadius.circular(11)
-                   ),
-                   child: Row(
-                     children: [
-                     Icon(Icons.remove, size: 18)
-                     ],
-                   )
-                 )
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30), // pill shape
+                      border: Border.all(color: Colors.grey.shade300),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 8,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Quantity",
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                        InkWell(
+                          onTap: () {
+                             if(quantity>1){
+                               setState(() {
+                                 quantity--;
+                               });
+                             }
+                          },
+                          borderRadius: BorderRadius.circular(50),
+                          child: Container(
+                            height: 32,
+                            width: 32,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.remove, color: Colors.red, size: 18),
+                          ),
+                        ),
+
+                        SizedBox(width: 14),
+
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            quantity.toString(),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(width: 14),
+
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              quantity++;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(50),
+                          child: Container(
+                            height: 32,
+                            width: 32,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.add, color: Colors.white, size: 18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
+              SizedBox(height: 10,),
+
+
+
               // stock & rating
               Row(
                 children: [
@@ -253,34 +317,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ],
               ),
-              //price & discout
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Icon(Icons.currency_rupee, color: Colors.green),
-                    //price
-                    Text(
-                      "${product.price}",
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.green,
-                      ),
-                    ),
-                    SizedBox(width: 15),
-                    //discount
-                    Text(
-                      "${product.discountPercentage.toStringAsFixed(0)}% OFF",
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              SizedBox(height: 10,),
+
               //description
               Padding(
                 padding: const EdgeInsets.all(10),
@@ -325,19 +363,90 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
               ),
-              //tag
+              SizedBox(height: 10,),
+
+              //brand , category,tag
+
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+
+                    Row(
+                      children: [
+
+                        /// Brand
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.store, size: 14, color: Colors.black54),
+                              SizedBox(width: 5),
+                              Text(
+                                (product.brand != null &&
+                                    product.brand!.trim().isNotEmpty)
+                                    ? product.brand!
+                                    : "No Brand",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(width: 8),
+
+                        /// Category
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.category, size: 14, color: Colors.blue),
+                              SizedBox(width: 5),
+                              Text(
+                                product.category,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 10),
                     Wrap(
-                      spacing: 6,
+                      spacing: 8,
+                      runSpacing: 6,
                       children: product.tags.map((tag) {
-                        return Chip(
-                          backgroundColor: Colors.blue.shade50,
-                          label: Text(
+                        return Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.green.shade200),
+                          ),
+                          child: Text(
                             tag,
-                            style: GoogleFonts.poppins(fontSize: 12),
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              color: Colors.green.shade800,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         );
                       }).toList(),
@@ -345,6 +454,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ],
                 ),
               ),
+
+              SizedBox(height: 10,),
+
               //shiping & policy
               Padding(
                 padding: const EdgeInsets.all(8.0),
