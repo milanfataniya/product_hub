@@ -40,11 +40,8 @@ class FirebaseService {
 
   Future<String?> signup(String email, String password) async {
     try {
-      UserCredential userCredential =
-      await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
       if (userCredential.user != null) {
         await userCredential.user!.sendEmailVerification();
       }
@@ -58,18 +55,17 @@ class FirebaseService {
 
   Future<String?> signin(String email, String password) async {
     try {
-      UserCredential userCredential =
-      await _auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      User? user=userCredential!.user;
-          await user?.reload();
-          user=_auth.currentUser;
-        if(user!=null && !user.emailVerified){
-          await _auth.signOut();
-          return "Please verify email first";
-        }
+      User? user = userCredential!.user;
+      await user?.reload();
+      user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await _auth.signOut();
+        return "Please verify email first";
+      }
       return null;
     } on FirebaseAuthException catch (e) {
       return handleAuthError(e.code);
@@ -92,18 +88,23 @@ class FirebaseService {
       return "Something went wrong";
     }
   }
+
   Future<void> saveUserData({
     required String uid,
     required String name,
     required String email,
+    required String phone,
+    required String address,
+    required String city,
+
   }) async {
-    await FirebaseFirestore.instance
-        .collection("users")
-        .doc(uid)
-        .set({
+    await FirebaseFirestore.instance.collection("users").doc(uid).set({
       "uid": uid,
       "name": name,
       "email": email,
+      "phone": phone,
+      "address": address,
+      "city": city,
       "createdAt": DateTime.now(),
     });
   }
@@ -120,4 +121,49 @@ class FirebaseService {
     }
     return null;
   }
+
+  Future<bool> addToCart({
+    required String productId,
+    required String title,
+    required int quantity,
+    required double price,
+    required String image,
+    required double TotlePrice,
+  }) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return false;
+
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.uid)
+          .collection("cart")
+          .doc(productId)
+          .set({
+            "productId": productId,
+            "title": title,
+            "quantity": quantity,
+            "price": price,
+            "TotalPrice":TotlePrice,
+            "image": image,
+            "createdAt": FieldValue.serverTimestamp(),
+          });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Stream<QuerySnapshot> getCartItems() {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return Stream.empty();
+    return FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .collection("cart")
+        .orderBy("createdAt", descending: true)
+        .snapshots();
+  }
+
 }

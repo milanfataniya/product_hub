@@ -43,7 +43,10 @@ class CustomDialog extends StatelessWidget {
               Navigator.pop(context);
 
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(result ?? "Password reset link sent")),
+                SnackBar(
+                  backgroundColor: Colors.orange,
+                    content: Text("Reset link sent to ${controller.text}"),
+                ),
               );
             }
           },

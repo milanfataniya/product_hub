@@ -6,6 +6,7 @@ import 'package:product_hub/Screens/auth/login_screen.dart';
 import 'package:product_hub/Screens/home/home_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:product_hub/Screens/home/main_screen.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -22,13 +23,13 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void checkuser()async{
-    await Future.delayed(Duration(seconds: 10));
+    await Future.delayed(Duration(seconds: 6));
 
     User? user=FirebaseAuth.instance.currentUser;
     if(user!=null){
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (_) => MainScreen()),
       );
     }
     else{
@@ -37,7 +38,6 @@ class _SplashScreenState extends State<SplashScreen> {
         MaterialPageRoute(builder: (context) => LoginScreen()),
       );
     }
-
   }
   @override
   Widget build(BuildContext context) {
@@ -46,8 +46,8 @@ class _SplashScreenState extends State<SplashScreen> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFFE8FDFC),
-              Color(0xFFD1F5F2),
+              Color(0xFFFFE0B2), // light orange
+              Color(0xFFFFCC80),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -57,17 +57,8 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Lottie.asset('assets/animation/Loading.json', width: 150),
+              Lottie.asset('assets/animation/Splash_animation.json',),
               SizedBox(height: 10,),
-              Text(
-                "Getting things ready...",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF134E4A),
-                  letterSpacing: 0.5,
-                ),
-              ),
             ],
           ),
         ),

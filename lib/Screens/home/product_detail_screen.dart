@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:product_hub/Firebase_auth_service/firebase.dart';
 import 'package:product_hub/Model/products_model.dart';
+import 'package:product_hub/Screens/home/cart_screen.dart';
 import 'package:product_hub/Widgets/custom_appbar.dart';
+import 'package:product_hub/Widgets/dilog_box.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
@@ -14,6 +17,8 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int quantity = 1;
+  bool isAddToCartLoading = false;
+  double TotlePrice=0;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +48,103 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             Expanded(
               child: OutlinedButton(
                 onPressed: () async{
+                  try{
+                    setState(() {
+                      isAddToCartLoading=true;
+                    });
+                    TotlePrice=quantity*product.price;
+                    bool result=await firebaseService.addToCart(
+                        productId: product.id.toString(),
+                        title: product.title,
+                        quantity: quantity,
+                        price: product.price,
+                        TotlePrice: TotlePrice,
+                        image: product.thumbnail
+                    );
+                      if(result){
+                        showDialog(context: context, builder: (context){
+                          return AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            backgroundColor: Colors.white,
+                            elevation: 10,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
 
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.08),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: SizedBox(
+                                    height: 100,
+                                    width: 100,
+                                    child: Lottie.asset("assets/animation/add_to_cart.json"),
+                                  ),
+                                ),
+
+                                SizedBox(height: 15),
+
+                                Text(
+                                  "Added to Cart",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+
+                                SizedBox(height: 8),
+                                Text(
+                                  product.title,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+
+                                SizedBox(height: 10),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    "Quantity: $quantity",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        });
+                        Future.delayed(Duration(seconds: 2),(){
+                          Navigator.pop(context);
+
+                        });
+                      }
+                      else{}
+
+                  }
+                  catch(e){print(e.toString());}
+                  finally{
+
+                    setState(() {
+                      isAddToCartLoading=false;
+                    });
+                  }
                 },
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 14),
@@ -52,7 +153,30 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Text(
+                child: isAddToCartLoading?
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      "Please wait...",
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
+                )
+                    :Text(
                   "Add to Cart",
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
@@ -67,7 +191,85 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Buy now logic
+                  showDialog(context: context, builder:(context){
+                    return AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      content: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+
+                            SizedBox(
+                              height: 120,
+                              child: Lottie.asset("assets/animation/saved.json",repeat: false),
+                            ),
+
+                            SizedBox(height: 10),
+
+                            Text(
+                              "Order Summary",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            SizedBox(height: 5),
+
+                            Text(
+                              "Review your order details",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+
+                            SizedBox(height: 15),
+
+                            InfoBoxRow(
+                              label: "Quantity",
+                              value: quantity.toString(),
+                            ),
+
+                            SizedBox(height: 10),
+
+                            InfoBoxRow(
+                              label: "Price",
+                              value: "₹${product.price}",
+                            ),
+
+                            SizedBox(height: 10),
+
+                            InfoBoxRow(
+                              width: double.infinity,
+                              label: "Total Price",
+                              value: "₹${product.price * quantity}",
+                              gradientColors: [
+                                Color(0xFFC8E6C9),
+                                Color(0xFF66BB6A),
+                              ],
+                            ),
+
+                            SizedBox(height: 15),
+
+                            Text(
+                              "Thank you for your purchase",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  });
+                  Future.delayed(Duration(seconds: 8),(){
+                    Navigator.pop(context);
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
@@ -96,24 +298,81 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             children: [
               //img
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(16),
                 child: Container(
+                  height: 280,
+                  width: double.infinity,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFFE0F7FA), Color(0xFFE0F7FD)],
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.orange,
+                      width: 1.5,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.orange.withOpacity(0.3),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
-                  child: ClipRRect(
-                    child: Image.network(
-                      height: 300,
-                      width: double.infinity,
-                      product.images.isNotEmpty
-                          ? product.images[0]
-                          : product.thumbnail,
-                    ),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            product.images.isNotEmpty
+                                ? product.images[0]
+                                : product.thumbnail,
+                            height: 220,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 10,
+                        left: 10,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            "New",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // 🔹 Favorite Icon
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            icon: Icon(Icons.favorite_border),
+                            onPressed: () {},
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -524,65 +783,72 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Column(
                     children:product.reviews.map((review){
                           return Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             child: Container(
-
-                              margin: EdgeInsets.symmetric(vertical: 10),
+                              padding: EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                gradient: LinearGradient(colors: [
-                                  Color(0xFFE8FDFC),
-                                  Color(0xFFD1F5F2),
-                                ])
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: Colors.grey.shade200),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 6,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
                               ),
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ListTile(
-                                      contentPadding: EdgeInsets.zero,
 
-                                      // 🔹 Name
-                                      title: Text(
-                                        review.reviewerName,
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.w600,
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 16,
+                                        backgroundColor: Colors.orange.shade100,
+                                        child: Text(
+                                          review.reviewerName[0].toUpperCase(),
+                                          style: TextStyle(
+                                            color: Colors.orange,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+
+                                      Expanded(
+                                        child: Text(
+                                          review.reviewerName,
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
 
-                                      // 🔹 Comment + Date
-                                      subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                      Row(
                                         children: [
-                                          Text(
-                                            review.comment,
-                                            style: GoogleFonts.poppins(fontSize: 13),
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            review.date,
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 11,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
+                                          Icon(Icons.star, color: Colors.amber, size: 14),
+                                          SizedBox(width: 2),
+                                          Text(review.rating.toString()),
                                         ],
                                       ),
+                                    ],
+                                  ),
 
+                                  SizedBox(height: 8),
 
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.star, color: Colors.amber, size: 16),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            review.rating.toString(),
-                                            style: GoogleFonts.poppins(fontSize: 12),
-                                          ),
-                                        ],
-                                      ),
+                                  Text(review.comment),
+
+                                  SizedBox(height: 8),
+
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      _formatDate(review.date),
+                                      style: TextStyle(fontSize: 11, color: Colors.grey),
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -597,7 +863,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
     );
   }
-
+  String _formatDate(String dateString) {
+    DateTime date = DateTime.parse(dateString);
+    return "${date.day}/${date.month}/${date.year}";
+  }
   Widget _infoRow(IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
@@ -607,10 +876,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: Colors.orange.shade100,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.blue, size: 18),
+            child: Icon(icon, color: Colors.orange, size: 18),
           ),
 
           SizedBox(width: 10),

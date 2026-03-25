@@ -10,6 +10,7 @@ import 'package:product_hub/Widgets/custom_appbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:product_hub/Widgets/loading.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,12 +19,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int currentIndex = 0;
   late Future<List<ProductModel>> productlist;
   Api_Service api_service = Api_Service();
   List<ProductModel> carouselItems = [];
   String UserName="";
   FirebaseService firebaseService = FirebaseService();
   @override
+
+
   void initState() {
     super.initState();
     productlist = api_service.getproduct();
@@ -35,6 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     getUserData();
   }
+
+
+
   User? user = FirebaseAuth.instance.currentUser;
   void getUserData() async {
     String? name = await firebaseService.getUserData();
@@ -50,33 +57,46 @@ class _HomeScreenState extends State<HomeScreen> {
         title: "Welcome $UserName",
         centerTitle: true,
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-              );
-            },
-            icon: Icon(Icons.logout),
-          ),
-        ],
       ),
       body: FutureBuilder<List<ProductModel>>(future: productlist,
           builder: (context,snapshot){
         if(snapshot.connectionState==ConnectionState.waiting){
-          return Center(child: CircularProgressIndicator(
-            color: Colors.green,
-            backgroundColor: Colors.white,
-          ));
+          return Loading();
         }
         if (snapshot.hasError) {
           return Center(child: Text("Error"));
         }
-
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text("No Data"));
+          return RefreshIndicator(
+            backgroundColor: Colors.white,
+            color: Colors.orangeAccent,
+            onRefresh: ()async{
+            final ref= await api_service.getproduct();
+            setState(() {
+              productlist = Future.value(ref);
+              carouselItems = List.from(ref)..shuffle();
+              carouselItems = carouselItems.take(5).toList();
+
+            });
+
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: ListView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(height: 300),
+                      Center(
+                        child: Text("No Data or Check Your Internet Connection."),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          );
         }
         final products=snapshot.data!;
         return RefreshIndicator(
@@ -265,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         product.thumbnail,
                                         height: 150,
                                         fit: BoxFit.contain,
+
                                       ),
                                     ),
 
