@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         );
-
+        password.clear();
         Future.delayed(Duration(seconds: 2));
         Navigator.pushAndRemoveUntil(
           context,
@@ -49,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
               (route) => false,
         );
       } else {
+        password.clear();
         ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
@@ -59,6 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );;
       }
     } catch (e) {
+      password.clear();
       print(e);
     } finally {
       setState(() => isloading = false);
@@ -143,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          "Login to continue",
+                          "Sign in to continue",
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
@@ -191,6 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (_formkey.currentState!.validate()) {
                                 signin();
                               }
+
                             },
                             child: isloading
                                 ? Row(
@@ -210,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             )
                                 :  Text(
-                              "Login",
+                              "Sign In",
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

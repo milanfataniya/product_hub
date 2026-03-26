@@ -13,6 +13,17 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String maskEmail(String email) {
+    int atIndex = email.indexOf('@');
+    if (atIndex <= 2) return email;
+    return email.substring(0, 2) + "****" + email.substring(atIndex);
+  }
+
+  String maskPhone(String phone) {
+    if (phone.length < 6) return phone;
+    return phone.substring(0, 2) + "******" + phone.substring(phone.length - 2);
+  }
+
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
@@ -97,10 +108,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
 
                   SizedBox(height: 5),
-
-                  // 🔹 Email
+                  //Email
                   Text(
-                    data['email'],
+                    maskEmail(data['email']),
                     style: TextStyle(
                       fontSize: 15,
                       color: Colors.grey,
@@ -109,7 +119,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   SizedBox(height: 25),
 
-                  // 🔹 Info Card (Premium)
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 16),
                     padding: EdgeInsets.all(18),
@@ -127,8 +136,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: [
 
-                        _profileTile(Icons.phone, "Phone", data['phone']),
+                        _profileTile(Icons.phone, "Phone", maskPhone(data['phone'])),
                         SizedBox(height: 14),
+
 
                         _profileTile(Icons.home, "Address", data['address']),
                         SizedBox(height: 14),

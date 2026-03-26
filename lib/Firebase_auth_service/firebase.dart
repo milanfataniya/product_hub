@@ -132,6 +132,7 @@ class FirebaseService {
   }) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
+
       if (user == null) return false;
 
       await FirebaseFirestore.instance

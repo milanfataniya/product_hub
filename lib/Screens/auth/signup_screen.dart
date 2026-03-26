@@ -56,6 +56,13 @@ class _SignupScreenState extends State<SignupScreen> {
           address: address.text,
           city: city.text,
         );
+        name.clear();
+        email.clear();
+        password.clear();
+        confirmPassword.clear();
+        phone.clear();
+        address.clear();
+        city.clear();
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -71,6 +78,8 @@ class _SignupScreenState extends State<SignupScreen> {
         );
 
       } else {
+        password.clear();
+        confirmPassword.clear();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.red,
@@ -81,6 +90,8 @@ class _SignupScreenState extends State<SignupScreen> {
         );
       }
     } catch (e) {
+      password.clear();
+      confirmPassword.clear();
       print(e);
     } finally {
       setState(() => isloading = false);
@@ -122,7 +133,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        /// Title
+                        //title
                         Text(
                           "Create Account",
                           style: GoogleFonts.poppins(
@@ -138,7 +149,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
 
                         const SizedBox(height: 20),
-                        // name
+                        //name
                         CustomeTextfield(
                           controller: name,
                           hintText: "Enter Name",
@@ -147,7 +158,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           prefixIcon: Icon(Icons.person),
                           keyboardType: TextInputType.text,
                         ),
-
+                          //email
                         CustomeTextfield(
                           controller: email,
                           hintText: "Enter Email",
@@ -156,7 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           prefixIcon: Icon(Icons.email),
                           keyboardType: TextInputType.emailAddress,
                         ),
-
+                          //phone
                         CustomeTextfield(
                           controller: phone,
                           hintText: "Enter Phone Number",
@@ -165,7 +176,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           prefixIcon: Icon(Icons.phone),
                           keyboardType: TextInputType.phone,
                         ),
-
+                                    //password
                         CustomeTextfield(
                           controller: password,
                           hintText: "Enter Password",
@@ -174,7 +185,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           prefixIcon: Icon(Icons.lock),
                           keyboardType: TextInputType.visiblePassword,
                         ),
-
+                                    //confirm password
                         CustomeTextfield(
                           controller: confirmPassword,
                           hintText: "Confirm Password",
@@ -183,7 +194,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           prefixIcon: Icon(Icons.lock),
                           keyboardType: TextInputType.visiblePassword,
                         ),
-
+                          //adress
                         CustomeTextfield(
                           controller: address,
                           hintText: "Enter Address",
@@ -192,7 +203,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           prefixIcon: Icon(Icons.home),
                           keyboardType: TextInputType.streetAddress,
                         ),
-
+                          //city
                         CustomeTextfield(
                           controller: city,
                           hintText: "Enter City",
@@ -204,7 +215,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                         SizedBox(height: 10,),
 
-                        /// Signup Button
+                        //signup button
                         SizedBox(
                           width: double.infinity,
                           height: 45,
@@ -218,9 +229,12 @@ class _SignupScreenState extends State<SignupScreen> {
                             onPressed: isloading
                                 ? null
                                 : () {
+
                               if (_formkey.currentState!.validate()) {
 
                                 if (password.text != confirmPassword.text) {
+                                  password.clear();
+                                  confirmPassword.clear();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       backgroundColor: Colors.red,
@@ -235,8 +249,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                                 creatuser();
 
-                                password.text="";
-                                confirmPassword.text="";
+
                               }
                                   },
                             child: isloading
@@ -287,7 +300,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 );
                               },
                               child: const Text(
-                                "Login",
+                                "Sign In",
                                 style: TextStyle(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.bold,

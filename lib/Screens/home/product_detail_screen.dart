@@ -53,14 +53,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       isAddToCartLoading=true;
                     });
                     TotlePrice=quantity*product.price;
-                    bool result=await firebaseService.addToCart(
-                        productId: product.id.toString(),
-                        title: product.title,
-                        quantity: quantity,
-                        price: product.price,
-                        TotlePrice: TotlePrice,
-                        image: product.thumbnail
-                    );
+                      bool result=await firebaseService.addToCart(
+                          productId: product.id.toString(),
+                          title: product.title,
+                          quantity: quantity,
+                          price: product.price,
+                          image: product.thumbnail,
+                          TotlePrice: TotlePrice);
                       if(result){
                         showDialog(context: context, builder: (context){
                           return AlertDialog(
