@@ -6,7 +6,7 @@ import 'package:product_hub/Model/products_model.dart';
 import 'package:product_hub/Screens/home/cart_screen.dart';
 import 'package:product_hub/Widgets/custom_appbar.dart';
 import 'package:product_hub/Widgets/dilog_box.dart';
-
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
   const ProductDetailScreen({super.key, required this.product});
@@ -19,6 +19,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int quantity = 1;
   bool isAddToCartLoading = false;
   double TotlePrice=0;
+  late Razorpay razorpay=Razorpay();
+
+  @override
+  void initState() {
+    super.initState();
+    razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+
+  }
+
+  @override
+  void dispose() {
+    razorpay.clear();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +60,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         child: Row(
           children: [
-
             Expanded(
               child: OutlinedButton(
                 onPressed: () async{
@@ -190,85 +205,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  showDialog(context: context, builder:(context){
-                    return AlertDialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      content: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-
-                            SizedBox(
-                              height: 120,
-                              child: Lottie.asset("assets/animation/saved.json",repeat: false),
-                            ),
-
-                            SizedBox(height: 10),
-
-                            Text(
-                              "Order Summary",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-
-                            SizedBox(height: 5),
-
-                            Text(
-                              "Review your order details",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-
-                            SizedBox(height: 15),
-
-                            InfoBoxRow(
-                              label: "Quantity",
-                              value: quantity.toString(),
-                            ),
-
-                            SizedBox(height: 10),
-
-                            InfoBoxRow(
-                              label: "Price",
-                              value: "₹${product.price}",
-                            ),
-
-                            SizedBox(height: 10),
-
-                            InfoBoxRow(
-                              width: double.infinity,
-                              label: "Total Price",
-                              value: "₹${product.price * quantity}",
-                              gradientColors: [
-                                Color(0xFFC8E6C9),
-                                Color(0xFF66BB6A),
-                              ],
-                            ),
-
-                            SizedBox(height: 15),
-
-                            Text(
-                              "Thank you for your purchase",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  });
-                  Future.delayed(Duration(seconds: 8),(){
-                    Navigator.pop(context);
-                  });
+                  var Totalprice=quantity*product.price;
+                  var options = {
+                    'key': 'rzp_test_Sdj7yFoz4h9l2L',
+                    'amount': (Totalprice*100).toInt(),
+                    'name': 'Product Hub',
+                    'description': product.title,
+                    'image': widget.product.thumbnail,
+                    'prefill': {
+                      'contact': '9999999999',
+                      'email': 'test@gmail.com'
+                    }
+                  };
+                  try {
+                    razorpay.open(options);
+                  } catch (e) {
+                    print("Error: $e");
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
@@ -894,4 +847,57 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
     );
   }
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "Payment Successful",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: EdgeInsets.all(10),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.error, color: Colors.white),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "Payment Failed , Please try again",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: EdgeInsets.all(10),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
+
 }
